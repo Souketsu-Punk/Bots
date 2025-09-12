@@ -29,11 +29,9 @@ except Exception:
     print("pip install websocket-client")
     exit(1)
 
-# -----------------------
 # CONFIG
-# -----------------------
-DERIV_APP_ID = "96437"
-DERIV_API_TOKEN = "JDKYPoc3aLSHjiY"  # demo token
+DERIV_APP_ID = "PUT ID HERE"
+DERIV_API_TOKEN = "PUT TOKEN HERE"  # demo token
 WS_URL = f"wss://ws.derivws.com/websockets/v3?app_id={DERIV_APP_ID}"
 
 SYMBOL = "R_10"
@@ -63,9 +61,7 @@ PING_INTERVAL = 25
 CSV_FILE = "dynamic_overunder_trades.csv"
 MIN_EV = 0.0
 
-# -----------------------
 # Helpers & dataclasses
-# -----------------------
 @dataclass
 class Candidate:
     side: str
@@ -89,9 +85,8 @@ def _next_req_id(self):
         self._req_counter += 1
     return self._req_counter
 
-# -----------------------
+
 # Bot class
-# -----------------------
 class DynamicOverUnderBot:
     def __init__(self, token: str, ws_url: str = WS_URL):
         self.token = token
@@ -142,9 +137,8 @@ class DynamicOverUnderBot:
         except Exception:
             pass
 
-    # -----------------------
+    
     # WebSocket callbacks
-    # -----------------------
     def _on_open(self, ws):
         print("[WS] open")
         if not self.token:
@@ -261,9 +255,8 @@ class DynamicOverUnderBot:
             except: pass
             time.sleep(PING_INTERVAL)
 
-    # -----------------------
+    
     # Request helpers
-    # -----------------------
     def request_ticks_history(self, count:int=1000,timeout:float=3.0)->Optional[List[float]]:
         tag=uuid.uuid4().hex
         req={"ticks_history":SYMBOL,"end":"latest","count":int(count),
@@ -344,9 +337,7 @@ class DynamicOverUnderBot:
             time.sleep(0.05)
         return (profit,info) if profit is not None else None
 
-    # -----------------------
     # Decision & stats
-    # -----------------------
     def compute_digit_stats_from_history(self, history_quotes:List[float])->List[float]:
         counts=[0]*10
         for q in history_quotes:
@@ -383,10 +374,8 @@ class DynamicOverUnderBot:
         stake=max(stake, MIN_STAKE)
         stake+=random.uniform(-0.05,0.05)
         return round(stake,2)
-
-    # -----------------------
+        
     # Decision loop with console log
-    # -----------------------
     def decision_loop(self):
         while self._tick_count<WARMUP_TICKS:
             time.sleep(0.2)
@@ -463,9 +452,7 @@ class DynamicOverUnderBot:
             print(f"{int(t[1])}: {t[2].upper()} T{t[3]} Stake:${t[4]:.2f} EV:{t[9]:.2f} Profit:{t[5]}")
         print("===============================")
 
-    # -----------------------
     # Start / Stop
-    # -----------------------
     def start(self):
         self.ws=websocket.WebSocketApp(self.ws_url,
                                        on_open=self._on_open,
@@ -483,9 +470,8 @@ class DynamicOverUnderBot:
         except: pass
         print("[BOT] stopped.")
 
-# -----------------------
+
 # RUN
-# -----------------------
 if __name__=="__main__":
     import sys
     import time
